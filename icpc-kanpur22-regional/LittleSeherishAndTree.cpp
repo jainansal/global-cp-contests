@@ -1,58 +1,50 @@
+// https://codedrills.io/contests/icpc-mathura-kanpur-2022-regional-round/problems/little-seherish-and-tree
+
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long
 
-vector<bool> is_prime;
-vector<ll> all_primes;
-
-void primes(ll lim)
-{
-    vector<bool> is_Prime(lim + 1, 1);
-    is_prime = is_Prime;
-    for (int i = 2; i * i <= lim; i++)
-    {
-        if (is_prime[i])
-        {
-            all_primes.push_back(i);
-            for (int j = i * i; j <= lim; j += i)
-            {
-                is_prime[j] = 0;
-            }
-        }
-    }
-}
-
 ll factors(ll num)
 {
-    cout<<num<<":";
     ll ans = 0;
-    for(auto i:all_primes)
+    for (ll i = 2; i * i <= num; i++)
     {
-        if(i>num) break;
-        while(!(num%i))
+        while (!(num % i))
         {
             ans++;
-            num/=i;
+            num /= i;
         }
     }
-    if(num>1) ans++;
-    cout<<ans<<endl;
+    if (num > 1)
+        ans++;
     return ans;
 }
 
-ll maxOps(vector<ll> &nodes, vector<vector<ll>> &edges)
+ll maxOps(vector<ll> &nodes, vector<set<ll>> &adj)
 {
+    ll n = nodes.size();
     ll ans = 0;
-    ll n = edges.size();
-    
-    for (auto i : edges)
+    while (true)
     {
-        ll num1 = nodes[i[0] - 1], num2 = nodes[i[1] - 1];
-        cout<<num1<<" "<<num2<<endl;
-        ll g = __gcd(num1, num2);
-        ans += factors(g);
-        num1 /= g, num2 /= g;
-        nodes[i[0] - 1] = num1, nodes[i[1] - 1] = num2;
+        vector<ll> node_list;
+        for (int i = 1; i <= n; i++)
+        {
+            if (adj[i].size() == 1)
+                node_list.push_back(i);
+        }
+        if (!node_list.size())
+            break;
+        for (auto x : node_list)
+        {
+            if (!adj[x].size())
+                continue;
+            ll node1 = x, node2 = *adj[x].begin();
+            ll g = __gcd(nodes[node1], nodes[node2]);
+            adj[node1].clear();
+            adj[node2].erase(node1);
+            ans += factors(g);
+            nodes[node1] /= g, nodes[node2] /= g;
+        }
     }
     return ans;
 }
@@ -61,25 +53,24 @@ void solution()
 {
     ll n;
     cin >> n;
-    vector<ll> nodes(n);
-    for (auto &i : nodes)
-        cin >> i;
-    vector<vector<ll>> edges(n - 1);
-    for (int i = 0; i < (n - 1); i++)
+    vector<ll> nodes(n + 1);
+    for (int i = 1; i <= n; i++)
+        cin >> nodes[i];
+    vector<set<ll>> adj(n + 1);
+    for (int i = 1; i < n; i++)
     {
         ll x, y;
         cin >> x >> y;
-        edges[i] = {x, y};
+        adj[x].insert(y);
+        adj[y].insert(x);
     }
-    // for(int i=2; i<=20; i++) cout<<is_prime[i]<<" ";
-    cout << maxOps(nodes, edges);
+    cout << maxOps(nodes, adj);
 }
 
 int main()
 {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    primes(1e7);
     int test_cases;
     cin >> test_cases;
     for (int i = 1; i <= test_cases; i++)
