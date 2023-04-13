@@ -29,10 +29,9 @@ ll factorCount(ll num)
 {
     if(num==1) return 1;
     ll ans = 0;
-    ll real_num = num;
     for(auto x:primes)
     {
-        if(x*x > real_num) break;
+        if(x*x > num) break;
         while(!(num%x))
         {
             ans++;
